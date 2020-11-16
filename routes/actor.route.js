@@ -4,8 +4,20 @@ const actorModel = require('../models/actor.model');
 const router = express.Router();
 
 router.get('/', async function (req, res) {
-  const list = await actorModel.getAll();
-  res.json(list);
+  const page = req.query.page;
+  const limit = req.query.limit;
+
+  if (page) {
+    let list = await actorModel.getAll();
+    res.json({
+      payload: list.slice((page - 1) * limit, limit * page),
+      size: list.length
+    })
+  }
+  else {
+    const list = await actorModel.getAll();
+    res.json(list);
+  }
 })
 
 router.get('/:id', async function (req, res) {
@@ -28,7 +40,7 @@ router.post('/', validation(schema), async function (req, res) {
 router.delete('/:id', async function (req, res) {
   const id = req.params.id || -1;
   const rs = await actorModel.delete(id);
-
+  console.log(id);
   if (rs) {
     return res.status(200).json("success");
   }
